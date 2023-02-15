@@ -61,7 +61,6 @@ exports.addProductToCart = async (req, res) => {
     //pushar mitt object till min Cart.
     cartList.cart.push({
       product: productId,
-      quantity: 1,
     });
 
     //kopplar på min totalamount till min price, så att den lägger till
@@ -119,3 +118,5 @@ exports.deleteProductInCart = async (req, res) => {
     });
   }
 };
+
+exports.deleteAllProductsInCart = async (req, res) => {};
