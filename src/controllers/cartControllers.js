@@ -1,26 +1,54 @@
 const Cart = require("../models/Cart");
 
 exports.getAllCarts = async (req, res) => {
-  const carts = await Cart.find();
+  try {
+    //hitta alla carts
+    const carts = await Cart.find();
 
-  return res.json(carts);
+    //response, alla carts
+    return res.status(200).json(carts);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
 };
 
 exports.getCartById = async (req, res) => {
-  const cartId = req.params.cartId;
-  const cart = await Cart.findById(cartId);
+  try {
+    //lägger in mitt cartId i en variabel
+    const cartId = req.params.cartId;
 
-  return res.json(cart);
+    //hittar specifik cart med hjälp av cartId
+    const cart = await Cart.findById(cartId);
+
+    //felmeddelande om ingen cart hittas - NOT FOUND
+    if (!cart) return res.status(404);
+
+    //response - specifik Cart
+    return res.status(200).json(cart);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
 };
 
 exports.createNewCart = async (req, res) => {
   try {
+    //lägger totalamount från Cart i en variabel
     const totalamount = req.body.totalamount;
 
+    //skapar ny cart
     const newCart = await Cart.create({
       totalamount: totalamount,
     });
 
+    //response ny cart som skapas i mongoDB
     return res
       .setHeader(
         "Location",
@@ -38,16 +66,23 @@ exports.createNewCart = async (req, res) => {
 };
 
 exports.deleteCartById = async (req, res) => {
-  // Get project id and place in local variable
-  const cartId = req.params.cartId;
-  // Check if project exists
-  const cartToDelete = await Cart.findById(cartId);
-  // IF (no project) return Not Found
-  // if (!projectToDelete) throw new NotFoundError('This project does not exist')
+  try {
+    //lägger mitt cartId i en variabel
+    const cartId = req.params.cartId;
+    // hittar Carten med mitt ID
+    const cartToDelete = await Cart.findById(cartId);
+    // Om det inte fungerar - return Not Found
+    if (!cartToDelete) return res.sendStatus(404);
 
-  // Delete project
-  await cartToDelete.delete();
+    // raderar cart
+    await cartToDelete.delete();
 
-  // Craft our response
-  return res.sendStatus(204);
+    // return att det fungerade, success.
+    return res.sendStatus(204);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
 };
