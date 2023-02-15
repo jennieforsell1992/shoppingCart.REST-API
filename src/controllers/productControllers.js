@@ -42,23 +42,55 @@ exports.getProductById = async (req, res) => {
 
 exports.addProductToCart = async (req, res) => {
   try {
+    //
     const productName = req.body.productName || "";
-    // const price = req.params.price;
+    const price = req.body.price;
     const id = req.body.id;
+    let totalamount = req.body.totalamount;
     const productId = req.params.productId;
-
+    //hämtar mitt id från min varukorg
     const cartList = await Cart.findById(id);
 
+    // console.log(cartList);
+    //felmeddelande
     if (!productName) {
       return res.status(400).json({
         message: "You must provide a product name",
       });
     }
+    //hämtar mitt id från min produkt
     const productItem = await Product.findById(productId);
+    // const productPrice = productItem.price;
 
-    cartList.cart.push(productItem);
+    console.log(productItem);
+
+    // totalamount = productItem.price;
+
+    // const productPrice = await Product.find(price);
+    // const cartTotalAmount = await Cart.findByIdAndUpdate(id, totalamount);
+
+    cartList.cart.push({
+      product: productId,
+      quantity: 1,
+    });
+
+    cartList.totalamount += productItem.price;
 
     await cartList.save();
+
+    // totalamount = 0;
+    // for (let i = 0; i < productPrice.length; i++) {
+    //   totalamount += productPrice[i];
+    // }
+
+    // if (totalamount) cartList.totalamount = totalamount;
+    // await cartList.save();
+
+    // let updatedCart = await Cart.updateOne({
+    //   id: id,
+
+    //   totalamount: totalamount,
+    // });
 
     return res.status(201).json(productItem);
   } catch (error) {
@@ -82,8 +114,12 @@ exports.deleteProductInCart = async (req, res) => {
     if (!productToDelete) return res.sendStatus(404);
 
     // await productToDelete.delete();
-    const index = shoppingCart.cart.findIndex((prodId) => prodId == productId);
+    const index = shoppingCart.cart.findIndex(
+      (object) => object?.product == productId
+    );
     shoppingCart.cart.splice(index, 1);
+
+    shoppingCart.totalamount -= productToDelete.price;
 
     await shoppingCart.save();
 
